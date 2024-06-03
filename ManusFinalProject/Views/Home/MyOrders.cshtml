@@ -1,0 +1,162 @@
+﻿
+@{
+    ViewBag.Title = "MyOrders";
+}
+<br />
+<div class="container" style="background-color: rgb(24, 32, 51); padding: 20px; border-radius: 15px;">
+    <div class="row">
+        <div class="col-md-6 text-left">
+            <span style="font-size: 24px; color: white;">Hi, @ViewBag.FirstName!</span>
+        </div>
+        <div class="col-md-6 text-right">
+            <a href="@Url.Action("CustomerProfile", "Home")" class="btn btn-secondary" style="font-size: 16px; color: white;">Profile</a>
+            <a href="@Url.Action("CustomerProducts", "Home")" class="btn btn-secondary" style="font-size: 16px; color: white;">Products</a>
+            <a href="@Url.Action("ViewCart", "Home")" class="btn btn-secondary" style="font-size: 16px; color: white;">Cart</a>
+            <a href="@Url.Action("MyOrders", "Home")" class="btn btn-secondary" style="font-size: 16px; color: white;">Orders</a>
+            <button type="button" id="logoutButton" class="btn btn-secondary" style="font-size: 16px;">Logout</button>
+        </div>
+    </div>
+</div>
+<br />
+<div class="jumbotron">
+    <img src="~/Content/Images/CafeCartel.png" alt="CafeCartel Logo" class="logo-img">
+    <p class="lead">Your exclusive shop for premium coffee blends.</p> <br />
+    <p><a href="@Url.Action("CustomerProducts", "Home")" class="btn btn-primary btn-lg">Shop now &raquo;</a></p>
+</div>
+
+<div class="text-center">
+    <h2>Your Orders</h2>
+</div>
+
+
+<div class="order-container">
+    <table class="order-table">
+        <thead>
+            <tr>
+                <th>Product Name</th>
+                <th>Quantity</th>
+                <th>Price</th>
+                <th>Total Amount</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody id="orderItems">
+            <!-- Order items will be dynamically populated here -->
+        </tbody>
+    </table>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+        // Function to fetch and display user orders
+        function loadOrders() {
+            $.get("../Home/GetOrders", function (data) {
+                var ordersHtml = '';
+                $.each(data, function (index, order) {
+                    ordersHtml += '<tr>' +
+                        '<td>' + order.ProductName + '</td>' +
+                        '<td>' + order.Quantity + '</td>' +
+                        '<td>' + order.Price + '</td>' +
+                        '<td>' + order.TotalAmount + '</td>' +
+                        '<td>' + order.Status + '</td>' +
+                        '<td><button class="cancel-order-btn" data-order-id="' + order.OrderId + '">Cancel</button></td>' +
+                        '</tr>';
+                });
+                $("#orderItems").html(ordersHtml);
+            });
+        }
+
+        // Load user orders on page load
+        loadOrders();
+
+        //cancel button to cancel order, update status to Cancelled
+        $(document).on("click", ".cancel-order-btn", function () {
+            var orderId = $(this).data("order-id");
+
+            // Confirm cancellation
+            if (confirm("Are you sure you want to cancel this order?")) {
+                // AJAX request to cancel order
+                $.post("../Home/CancelOrder", { orderId: orderId }, function (response) {
+                    if (response.success) {
+                        alert(response.message);
+                        // Reload orders after cancellation
+                        loadOrders();
+                    } else {
+                        alert(response.message);
+                    }
+                });
+            }
+        });
+
+        $("#logoutButton").click(function () {
+            // Prompt the user for confirmation
+            if (confirm("Are you sure you want to logout?")) {
+                // If user confirms, make an AJAX request to the logout action
+                $.post("../Home/Logout", function (response) {
+                    if (response.success) {
+                        alert(response.message);
+                        // Redirect to the login page or any other page
+                        window.location.href = "@Url.Action("CustomerLogin", "Home")";
+                    } else {
+                        alert("Logout failed. Please try again.");
+                    }
+                });
+            }
+        });
+
+        });
+    </script>
+}
+
+<style>
+    h2 {
+        font-size: 34px; /* Adjust as needed */
+    }
+
+    .jumbotron {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .logo-img {
+        margin-top: -20px;
+        width: 300px; /* Adjust size as needed */
+        height: auto;
+    }
+
+    .btn {
+        font-size: 16px; /* Adjust as needed */
+        padding: 10px 20px; /* Increase padding for larger buttons */
+    }
+
+    .order-container {
+        width: 80%;
+        margin: auto;
+        padding: 20px;
+        background-color: #f9f9f9;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .order-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+        .order-table th, .order-table td {
+            font-size: 18px; /* Adjust as needed */
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: center;
+        }
+
+        .order-table th {
+            background-color: #f2f2f2;
+        }
+</style>
+

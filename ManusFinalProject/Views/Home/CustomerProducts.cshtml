@@ -1,0 +1,306 @@
+﻿@using System;
+@using System.Collections.Generic;
+@using System.Linq;
+@using System.Web;
+@using System.Web.Mvc;
+@using System.Data;
+@using System.Data.SqlClient;
+@using System.IO;
+@using System.Drawing;
+@using System.Drawing.Imaging;
+@using System.Web.Services;
+
+@{
+    ViewBag.Title = "CustomerProducts";
+}
+<br />
+<div class="container" style="background-color: rgb(24, 32, 51); padding: 20px; border-radius: 15px;">
+    <div class="row">
+        <div class="col-md-6 text-left">
+            <span style="font-size: 24px; color: white;">Hi, @ViewBag.FirstName!</span>
+        </div>
+        <div class="col-md-6 text-right">
+            <a href="@Url.Action("CustomerProfile", "Home")" class="btn btn-secondary" style="font-size: 16px; color: white;">Profile</a>
+            <a href="@Url.Action("CustomerProducts", "Home")" class="btn btn-secondary" style="font-size: 16px; color: white;">Products</a>
+            <a href="@Url.Action("ViewCart", "Home")" class="btn btn-secondary" style="font-size: 16px; color: white;">Cart</a>
+            <a href="@Url.Action("MyOrders", "Home")" class="btn btn-secondary" style="font-size: 16px; color: white;">Orders</a>
+            <button type="button" id="logoutButton" class="btn btn-secondary" style="font-size: 16px;">Logout</button>
+        </div>
+    </div>
+</div>
+<br />
+<div class="jumbotron">
+    <img src="~/Content/Images/CafeCartel.png" alt="CafeCartel Logo" class="logo-img">
+    <p class="lead">Your exclusive shop for premium coffee blends.</p> <br />
+    <p><a href="@Url.Action("CustomerProducts", "Home")" class="btn btn-primary btn-lg">Shop now &raquo;</a></p>
+</div>
+<div style="float: right; font-size: 16px;">
+    <a href="@Url.Action("ViewCart", "Home")" class="btn btn-primary">View Cart &raquo;</a>
+</div>
+<br />
+<br />
+
+<br><div class="search-container" style="text-align: right; margin-bottom: 20px;">
+    <form id="searchForm">
+        <label for="searchQuery">Search Products:</label>
+        <input type="text" id="searchQuery" name="searchQuery" />
+        <button type="button" id="searchButton">Search</button>
+    </form>
+</div>
+
+<style>
+    .jumbotron {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .logo-img {
+        margin-top: -20px;
+        width: 300px; /* Adjust size as needed */
+        height: auto;
+    }
+
+    .btn {
+        font-size: 18px; /* Adjust as needed */
+        padding: 10px 20px; /* Increase padding for larger buttons */
+    }
+
+    .search-container {
+        text-align: right;
+        margin-bottom: 20px;
+    }
+
+    #searchForm label {
+        font-size: 18px; /* Increase label font size */
+        margin-right: 10px; /* Optional: add some space between label and input */
+    }
+
+    #searchForm input[type="text"] {
+        font-size: 1.5rem; /* Increase input text size */
+        padding: 10px; /* Increase padding for larger input field */
+        margin-right: 10px; /* Optional: add some space between input and button */
+    }
+
+    #searchForm button {
+        font-size: 18px; /* Increase button text size */
+        padding: 10px 20px; /* Increase padding for larger button */
+    }
+
+    .header {
+        padding: 20px;
+        text-align: center;
+    }
+
+        .header h1 {
+            margin: 0;
+        }
+
+    .product-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        justify-content: center;
+    }
+
+    .product-card {
+        background-color: #f2f2f2;
+        border: 1px solid #dddddd;
+        border-radius: 5px;
+        width: 300px;
+        text-align: center;
+        padding: 15px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+        .product-card img {
+            max-width: 100%;
+            height: auto;
+            border-bottom: 1px solid #dddddd;
+            padding-bottom: 15px;
+        }
+
+        .product-card h3 {
+            font-size: 20px;
+            margin: 15px 0;
+        }
+
+        .product-card p {
+            font-size: 16px;
+            margin: 5px 0;
+        }
+
+        .product-card .price {
+            font-size: 18px;
+            color: #333;
+            font-weight: bold;
+        }
+
+        .product-card .add-to-cart, .buy-now {
+            margin-top: 10px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+
+            .product-card .add-to-cart:hover, .buy-now:hover {
+                background-color: #218838;
+            }
+</style>
+
+<div class="product-grid">
+    @{
+        string connStr = @"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=D:\JVFILES\ASP\ManusFinalProject\ManusFinalProject\App_Data\Database1.mdf;Integrated Security=True";
+        using (var db = new SqlConnection(connStr))
+        {
+            db.Open();
+            using (var cmd = db.CreateCommand())
+            {
+                cmd.CommandType = CommandType.Text;
+                cmd.CommandText = "SELECT * FROM PRODUCT";
+                using (var reader = cmd.ExecuteReader())
+                {
+                    if (reader.HasRows)
+                    {
+                        while (reader.Read())
+                        {
+                            <div class="product-card">
+                                @if (!string.IsNullOrEmpty(reader["Image"].ToString()))
+                                {
+                                    <img src="~/Content/Images/@reader["Image"]" alt="@reader["ProductName"]" />
+                                }
+                                else
+                                {
+                                    <img src="~/Content/Images/no-image-available.png" alt="No Image" />
+                                }
+                                <h3>@reader["ProductName"]</h3>
+                                <p>Brand: @reader["BrandName"]</p>
+                                <p>Blend: @reader["SpecificCoffeeBlend"]</p>
+                                <p>Flavor: @reader["FlavorProfile"]</p>
+                                <p>Roast Level: @reader["RoastLevel"]</p>
+                                <p>Origin: @reader["Origin"]</p>
+                                <p>Packaging Size: @reader["PackagingSize"]</p>
+                                <p>Expiry Date: @reader["ExpiryDate"]</p>
+                                <p class="price">₱@reader["Price"]</p>
+                                <p>Availability: @reader["Availability"]</p>
+                                <p>Quantity: @reader["Quantity"]</p>
+                                <input type="number" class="quantity-input" data-id="@reader["ProductID"]" value="1" min="1" max="@reader["Quantity"]" /> <br />
+                                <button type="button" class="add-to-cart" data-id="@reader["ProductID"]">Add to Cart</button>
+                                <button type="button" class="buy-now" data-id="@reader["ProductID"]">Buy Now</button>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <p>No products available.</p>
+                    }
+                }
+            }
+        }
+    }
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // Function to filter products based on search query
+            function filterProducts(searchQuery) {
+                var filter = searchQuery.toUpperCase();
+                $(".product-card").each(function () {
+                    var text = $(this).text().toUpperCase();
+                    $(this).toggle(text.indexOf(filter) > -1);
+                });
+            }
+
+            // Event listener for search button click
+            $("#searchButton").click(function () {
+                var searchQuery = $("#searchQuery").val();
+                filterProducts(searchQuery);
+            });
+
+            // Add to Cart button click handler
+            $(".product-grid").on("click", ".add-to-cart", function () {
+                var productId = $(this).data("id");
+                var productName = $(this).closest('.product-card').find('h3').text();
+                var quantity = $(this).siblings('.quantity-input').val();
+                var accountId = "@Session["AccountId"]";
+                var price = parseFloat($(this).closest('.product-card').find('.price').text().replace('₱', '').trim());
+
+                // Add to cart logic here (e.g., make an AJAX request to add the product to the cart)
+                //alert("Product " + productId + " added to cart.");
+                $.post("../Home/AddToCart", {
+                    productId: productId,
+                    productName: productName,
+                    quantity: quantity,
+                    accountId: accountId,
+                    price: price
+                }, function (res) {
+                    // Handle the response
+                    if (res.length > 0 && res[0].mess === 1) {
+                        alert("Product ID: " + productId + ", Product Name: " + productName + " added to cart.");
+                    } else {
+                        alert("Failed to add product to cart.");
+                    }
+                }).fail(function () {
+                    alert("Error communicating with the server.");
+                });
+            });
+
+            // Buy Now button click handler
+            $(".product-grid").on("click", ".buy-now", function () {
+                var productId = $(this).data("id");
+                var productName = $(this).closest('.product-card').find('h3').text();
+                var quantity = $(this).siblings('.quantity-input').val();
+                var accountId = "@Session["AccountId"]";
+                var price = parseFloat($(this).closest('.product-card').find('.price').text().replace('₱', '').trim());
+                //var totalAmount = price * quantity; // Calculate total amount
+
+                if (confirm("Are you sure you want to purchase this product?")) {
+                    $.post("../Home/BuyNow", {
+                        productId: productId,
+                        productName: productName,
+                        quantity: quantity,
+                        accountId: accountId,
+                        price: price
+                        //totalAmount: totalAmount
+                    }, function (res) {
+                        // Handle the response
+                        if (res.success) {
+                            alert(res.message);
+                            // Redirect to the cart page or any other page as needed
+                            window.location.href = "@Url.Action("MyOrders", "Home")";
+                        } else {
+                            alert(res.message);
+                        }
+                    }).fail(function () {
+                        alert("Error communicating with the server.");
+                    });
+                }
+             });
+
+            $("#logoutButton").click(function () {
+                // Prompt the user for confirmation
+                if (confirm("Are you sure you want to logout?")) {
+                    // If user confirms, make an AJAX request to the logout action
+                    $.post("../Home/Logout", function (response) {
+                        if (response.success) {
+                            alert(response.message);
+                            // Redirect to the login page or any other page
+                            window.location.href = "@Url.Action("CustomerLogin", "Home")";
+                        } else {
+                            alert("Logout failed. Please try again.");
+                        }
+                    });
+                }
+            });
+
+        });
+    </script>
+}

@@ -1,0 +1,129 @@
+﻿@{
+    ViewBag.Title = "CustomerLogin";
+}
+
+<style>
+    .jumbotron {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        text-align: center;
+    }
+
+    h1 {
+        font-size: 42px;
+    }
+
+    #loginForm .form-group label {
+        font-size: 18px; /* Adjust as needed */
+    }
+
+    #loginForm .form-control {
+        font-size: 18px; /* Adjust as needed */
+        padding: 20px; /* Increase padding for larger input fields */
+    }
+
+    #loginForm .btn {
+        font-size: 18px; /* Adjust as needed */
+        padding: 10px 20px; /* Increase padding for larger buttons */
+    }
+
+    p {
+        font-size: 16px; /* Adjust as needed */
+    }
+
+    a {
+        font-size: 16px; /* Adjust as needed */
+    }
+</style>
+<br />
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="jumbotron">
+                <img src="~/Content/Images/CafeCartel.png" alt="CafeCartel Logo" class="logo-img">
+                <p class="lead">Your exclusive shop for premium coffee blends.</p> <br />
+                <p><a href="@Url.Action("CustomerLogin", "Home")" class="btn btn-primary btn-lg">Shop now &raquo;</a></p>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <h1 style="display: inline-block;">Customer Login</h1>
+            <div style="display: inline-block; font-size: 16px; margin-left: 120px;">
+                <a href="@Url.Action("AdminLogin", "Home")">Login as Admin</a>
+            </div>
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-12">
+                        <form id="loginForm" method="post">
+                            <div class="form-group">
+                                <label for="username"><br />Username:</label>
+                                <input type="text" class="form-control" id="username" name="username">
+                                <span class="text-danger" id="usernameError"></span>
+                            </div> <br />
+                            <div class="form-group">
+                                <label for="password">Password:</label>
+                                <input type="password" class="form-control" id="password" name="password">
+                                <span class="text-danger" id="passwordError"></span>
+                            </div> <br />
+                            <button type="submit" class="btn btn-primary">Login</button>
+                        </form>
+                        <br /> <br />
+                        <p>Don't have an account? <a href="@Url.Action("CreateAccount", "Home")">Create account</a>.</p>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="~/Scripts/jqueryLatest/jquery-3.7.1.min.js"></script>
+<script>
+    $(document).ready(function () {
+        $("#loginForm").submit(function (e) {
+            e.preventDefault();
+            var username = $("#username").val();
+            var password = $("#password").val();
+            var isValid = true;
+
+            // Validation
+            if (username.trim() === "") {
+                $("#usernameError").text("Username is required.");
+                isValid = false;
+            } else {
+                $("#usernameError").text("");
+            }
+
+            if (password.trim() === "") {
+                $("#passwordError").text("Password is required.");
+                isValid = false;
+            } else {
+                $("#passwordError").text("");
+            }
+
+            if (isValid) {
+                $.post("../Home/customer", {
+                    username: username,
+                    password: password
+                }, function (response) {
+                    if (response.length > 0 && response[0].mess === 1) {
+                        // Show success message
+                        alert("Logged in successfully.");
+                        // Redirect to the product entry form or any other desired page
+                        window.location.href = "@Url.Action("CustomerProducts", "Home")";
+                    } else {
+                        // Show error message or handle invalid login
+                        alert("Invalid username or password.");
+                    }
+                });
+            }
+        });
+    });
+</script>
+
+@if (!string.IsNullOrEmpty(ViewBag.SuccessMessage))
+{
+    <script>
+        alert('@Html.Raw(ViewBag.SuccessMessage)');
+    </script>
+}

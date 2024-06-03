@@ -1,0 +1,44 @@
+﻿@{
+    ViewBag.Title = "Home Page";
+}
+<style>
+    .jumbotron {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        text-align: center;
+    }
+</style>
+<br />
+<div class="jumbotron">
+    <img src="~/Content/Images/CafeCartel.png" alt="CafeCartel Logo" class="logo-img">
+    <p class="lead">Your exclusive shop for premium coffee blends.</p> <br />
+    <p><a href="@Url.Action("CustomerLogin", "Home")" class="btn btn-primary btn-lg">Shop now &raquo;</a></p>
+</div>
+
+<div class="row">
+    <div class="col-md-4">
+        <h2>Getting started</h2>
+        <p>
+            Explore our collection of coffee products, from rich espresso blends to smooth, flavorful roasts.
+            Whether you're a casual coffee drinker or a connoisseur, we have something to satisfy your taste.
+        </p>
+    </div>
+    <div class="col-md-4">
+        <h2>Login</h2>
+        <p>
+            Already have an account? Log in to view your cart and manage your preferences.
+            Enjoy a seamless shopping experience with CafeCartel.
+        </p>
+        <p><a class="btn btn-default" href="@Url.Action("CustomerLogin", "Home")">Log in &raquo;</a></p>
+    </div>
+    <div class="col-md-4">
+        <h2>Register</h2>
+        <p>
+            New to CafeCartel? Create an account to enjoy and shop seamlessly for coffee products.
+            Join our community today!
+        </p>
+        <p><a class="btn btn-default" href="@Url.Action("CreateAccount", "Home")">Register &raquo;</a></p>
+    </div>
+</div>

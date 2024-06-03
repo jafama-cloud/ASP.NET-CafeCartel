@@ -1,0 +1,357 @@
+﻿@using System;
+@using System.Data;
+@using System.Data.SqlClient;
+@using System.Web.Mvc;
+
+@{
+    ViewBag.Title = "CustomerProfile";
+
+    // Retrieve the current user's account ID from session
+    var accountId = Session["AccountId"] != null ? Session["AccountId"].ToString() : null;
+
+    // Initialize variables to store profile data
+    string firstName = "";
+    string lastName = "";
+    string dateOfBirth = "";
+    string gender = "";
+    string contactNumber = "";
+    string email = "";
+    string streetAddress = "";
+    string city = "";
+    string barangay = "";
+    string postalCode = "";
+    string country = "";
+    string occupation = "";
+    string educationLevel = "";
+    string shippingAddress = "";
+}
+<style>
+    .jumbotron {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .logo-img {
+        margin-top: -20px;
+        width: 300px; /* Adjust size as needed */
+        height: auto;
+    }
+
+    p {
+        font-size: 18px; /* Adjust as needed */
+    }
+
+    h3 {
+        font-size: 22px; /* Adjust as needed */
+    }
+
+    .btn {
+        font-size: 18px; /* Adjust as needed */
+        padding: 10px 20px; /* Increase padding for larger buttons */
+    }
+</style>
+<br />
+<div class="container" style="background-color: rgb(24, 32, 51); padding: 20px; border-radius: 15px;">
+    <div class="row">
+        <div class="col-md-6 text-left">
+            <span style="font-size: 24px; color: white;">Hi, @ViewBag.FirstName!</span>
+        </div>
+        <div class="col-md-6 text-right">
+            <a href="@Url.Action("CustomerProfile", "Home")" class="btn btn-secondary" style="font-size: 16px; color: white;">Profile</a>
+            <a href="@Url.Action("CustomerProducts", "Home")" class="btn btn-secondary" style="font-size: 16px; color: white;">Products</a>
+            <a href="@Url.Action("ViewCart", "Home")" class="btn btn-secondary" style="font-size: 16px; color: white;">Cart</a>
+            <a href="@Url.Action("MyOrders", "Home")" class="btn btn-secondary" style="font-size: 16px; color: white;">Orders</a>
+            <button type="button" id="logoutButton" class="btn btn-secondary" style="font-size: 16px;">Logout</button>
+        </div>
+    </div>
+</div>
+<br />
+<div class="jumbotron">
+    <img src="~/Content/Images/CafeCartel.png" alt="CafeCartel Logo" class="logo-img">
+    <h1 style="text-align: center;">Customer Profile</h1>
+    
+</div>
+
+@if (accountId != null)
+{
+    // Establish connection to the database
+    string connStr = @"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=D:\JVFILES\ASP\ManusFinalProject\ManusFinalProject\App_Data\Database1.mdf;Integrated Security=True";
+    using (var db = new SqlConnection(connStr))
+    {
+        db.Open();
+        using (var cmd = db.CreateCommand())
+        {
+            cmd.CommandType = CommandType.Text;
+            // Modify the query to retrieve only the current user's profile data
+            cmd.CommandText = "SELECT * FROM PROFILE WHERE Account_Id = @accountId";
+            cmd.Parameters.AddWithValue("@accountId", accountId);
+            using (var reader = cmd.ExecuteReader())
+            {
+                // Check if there are any rows returned
+                if (reader.Read())
+                {
+                    // Read and store the profile data
+                    firstName = reader["FirstName"].ToString();
+                    lastName = reader["LastName"].ToString();
+                    dateOfBirth = DateTime.Parse(reader["DateOfBirth"].ToString()).ToString("yyyy-MM-dd");
+                    gender = reader["Gender"].ToString();
+                    contactNumber = reader["ContactNumber"].ToString();
+                    email = reader["Email"].ToString();
+                    streetAddress = reader["StreetAddress"].ToString();
+                    city = reader["City"].ToString();
+                    barangay = reader["Barangay"].ToString();
+                    postalCode = reader["PostalCode"].ToString();
+                    country = reader["Country"].ToString();
+                    occupation = reader["Occupation"].ToString();
+                    educationLevel = reader["EducationLevel"].ToString();
+                    shippingAddress = reader["ShippingAddress"].ToString();
+                }
+                else
+                {
+                    // Handle case where no profile data is found for the current user
+                    <p>No profile data found.</p>
+                }
+            }
+        }
+    }
+    <hr />
+    <div>
+        <h3>Personal Information</h3> <br />
+        <p><strong>First Name:</strong> @firstName</p>
+        <p><strong>Last Name:</strong> @lastName</p>
+        <p><strong>Date of Birth:</strong> @dateOfBirth</p>
+        <p><strong>Gender:</strong> @gender</p>
+    </div>
+    <hr />
+    <div>
+        <h3>Contact Information</h3> <br />
+        <p><strong>Email:</strong> @email</p>
+        <p><strong>Contact Number:</strong> @contactNumber</p>
+    </div>
+    <hr />
+    <div>
+        <h3>Address</h3> <br />
+        <p><strong>Street Address:</strong> @streetAddress</p>
+        <p><strong>Barangay:</strong> @barangay</p>
+        <p><strong>City:</strong> @city</p>
+        <p><strong>Postal Code:</strong> @postalCode</p>
+        <p><strong>Country:</strong> @country</p>
+    </div>
+    <hr />
+    <div>
+        <h3>Additional Information</h3> <br />
+        <p><strong>Occupation:</strong> @occupation</p>
+        <p><strong>Education Level:</strong> @educationLevel</p>
+        <p><strong>Shipping Address:</strong> @shippingAddress</p>
+    </div>
+
+    <div>
+        <br />
+        <button type="button" id="editButton" class="btn btn-primary">Edit Profile</button>
+        <button type="button" id="deleteAccountButton" class="btn btn-danger" style="margin-left: 10px;">Delete Account</button>
+    </div>
+
+}
+
+<!-- Edit Profile Modal -->
+<div class="modal fade" id="editProfileModal" tabindex="-1" role="dialog" aria-labelledby="editProfileModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="editProfileModalLabel">Edit Profile</h2>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- Form to edit profile -->
+                <form id="editProfileForm">
+                    <!-- Profile fields -->
+                    <div class="form-group">
+                        <label for="editFirstName">First Name</label>
+                        <input type="text" class="form-control" id="editFirstName" name="editFirstName" value="@firstName">
+                    </div>
+                    <div class="form-group">
+                        <label for="editLastName">Last Name</label>
+                        <input type="text" class="form-control" id="editLastName" name="editLastName" value="@lastName">
+                    </div>
+                    <div class="form-group">
+                        <label for="editDateOfBirth">Date Of Birth</label>
+                        <input type="date" class="form-control" id="editDateOfBirth" name="editDateOfBirth" value="@dateOfBirth">
+                    </div>
+                    <div class="form-group">
+                        <label for="editGender">Gender:</label>
+                        <select id="editGender" name="gender" required>
+                            <option value="Male" @(gender == "Male" ? "selected" : "")>Male</option>
+                            <option value="Female" @(gender == "Female" ? "selected" : "")>Female</option>
+                            <option value="Other" @(gender == "Other" ? "selected" : "")>Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="editContactNumber">Contact Number:</label>
+                        <input type="text" class="form-control" id="editContactNumber" name="editContactNumber" value="@contactNumber">
+                    </div>
+                    <div class="form-group">
+                        <label for="editEmail">Email:</label>
+                        <input type="text" class="form-control" id="editEmail" name="editEmail" value="@email">
+                    </div>
+                    <div class="form-group">
+                        <label for="editStreetAddress">Street Address:</label>
+                        <input type="text" class="form-control" id="editStreetAddress" name="editStreetAddress" value="@streetAddress">
+                    </div>
+                    <div class="form-group">
+                        <label for="editCity">City:</label>
+                        <input type="text" class="form-control" id="editCity" name="editCity" value="@city">
+                    </div>
+                    <div class="form-group">
+                        <label for="editBarangay">Barangay:</label>
+                        <input type="text" class="form-control" id="editBarangay" name="editBarangay" value="@barangay">
+                    </div>
+                    <div class="form-group">
+                        <label for="editPostalCode">Postal Code:</label>
+                        <input type="text" class="form-control" id="editPostalCode" name="editPostalCode" value="@postalCode">
+                    </div>
+                    <div class="form-group">
+                        <label for="editCountry">Country:</label>
+                        <input type="text" class="form-control" id="editCountry" name="editCountry" value="@country">
+                    </div>
+                    <div class="form-group">
+                        <label for="editOccupation">Occupation:</label>
+                        <input type="text" class="form-control" id="editOccupation" name="editOccupation" value="@occupation">
+                    </div>
+                    <div class="form-group">
+                        <label for="editEducationLevel">Education Level:</label>
+                        <input type="text" class="form-control" id="editEducationLevel" name="editEducationLevel" value="@educationLevel">
+                    </div>
+                    <div class="form-group">
+                        <label for="editShippingAddress">Shipping Address:</label>
+                        <input type="text" class="form-control" id="editShippingAddress" name="editShippingAddress" value="@shippingAddress">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // Edit button click handler
+            $("#editButton").click(function () {
+                // Get current product details
+                // Populate the modal fields
+                $("#editFirstName").val('@firstName');
+                $("#editLastName").val('@lastName');
+                $("#editDateOfBirth").val('@dateOfBirth');
+                $("#editContactNumber").val('@contactNumber');
+                $("#editEmail").val('@email');
+                $("#editStreetAddress").val('@streetAddress');
+                $("#editCity").val('@city');
+                $("#editBarangay").val('@barangay');
+                $("#editPostalCode").val('@postalCode');
+                $("#editCountry").val('@country');
+                $("#editOccupation").val('@occupation');
+                $("#editEducationLevel").val('@educationLevel');
+                $("#editShippingAddress").val('@shippingAddress');
+
+                // Show the edit profile modal
+                $("#editProfileModal").modal("show");
+            });
+
+            // Handle form submission
+            $("#editProfileForm").submit(function (event) {
+                event.preventDefault();
+                // Your form submission logic goes here
+                // Clear previous validation feedback
+                // Validate fields (example)
+                // Clear previous validation feedback
+                $("#editProfileForm input, #editProfileForm select").removeClass("is-invalid");
+
+                // Validate fields (example)
+                var isValid = true;
+                $("#editProfileForm input[required], #editProfileForm select[required]").each(function () {
+                    if (!$(this).val()) {
+                        isValid = false;
+                        $(this).addClass("is-invalid");
+                    }
+                });
+
+                if (!isValid) {
+                    alert("Please fill in all required fields.");
+                    return;
+                }
+
+                // Create a FormData object to handle file upload
+                // Serialize the form data
+                var formData = new FormData(this);
+                formData.append("accountId", "@accountId");
+
+                $.post({
+                    url: "../Home/EditProfile", // Your server-side script to handle edit
+                    type: "POST",
+
+                    data: formData,
+                    contentType: false,
+                    processData: false,
+                    success: function (response) {
+                        if (response.length > 0 && response[0].mess === 1) {
+
+                            alert("Profile updated successfully.");
+                            location.reload(); // Reload the page to see the changes
+                        } else {
+                            alert("Failed to update profile.");
+                        }
+                    },
+                    error: function () {
+                        alert("Error communicating with the server.");
+                    }
+                });
+
+            });
+
+
+            // Delete button click handler
+            $("#deleteAccountButton").click(function () {
+                // Confirm deletion
+                var confirmed = confirm("Are you sure you want to delete your account?");
+                if (confirmed) {
+                    $.post("../Home/DeleteAccount", {
+                        accountId: '@accountId'
+                    }, function (res) {
+                        // Handle the response
+                        if (res.length > 0 && res[0].mess === 1) {
+                            alert("Account deleted successfully.");
+                            window.location.href = "@Url.Action("CustomerLogin", "Home")";
+                        } else {
+                            alert("Failed to delete account.");
+                        }
+                    }).fail(function () {
+                        alert("Error communicating with the server.");
+                    });
+                }
+            });
+
+
+            $("#logoutButton").click(function () {
+                // Prompt the user for confirmation
+                if (confirm("Are you sure you want to logout?")) {
+                    // If user confirms, make an AJAX request to the logout action
+                    $.post("../Home/Logout", function (response) {
+                        if (response.success) {
+                            alert(response.message);
+                            // Redirect to the login page or any other page
+                            window.location.href = "@Url.Action("CustomerLogin", "Home")";
+                        } else {
+                            alert("Logout failed. Please try again.");
+                        }
+                    });
+                }
+            });
+
+        });
+    </script>
+}

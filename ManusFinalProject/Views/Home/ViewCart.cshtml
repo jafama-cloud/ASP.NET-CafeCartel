@@ -1,0 +1,255 @@
+﻿@{
+    ViewBag.Title = "ViewCart";
+}
+<br />
+<div class="container" style="background-color: rgb(24, 32, 51); padding: 20px; border-radius: 15px;">
+    <div class="row">
+        <div class="col-md-6 text-left">
+            <span style="font-size: 24px; color: white;">Hi, @ViewBag.FirstName!</span>
+        </div>
+        <div class="col-md-6 text-right">
+            <a href="@Url.Action("CustomerProfile", "Home")" class="btn btn-secondary" style="font-size: 16px; color: white;">Profile</a>
+            <a href="@Url.Action("CustomerProducts", "Home")" class="btn btn-secondary" style="font-size: 16px; color: white;">Products</a>
+            <a href="@Url.Action("ViewCart", "Home")" class="btn btn-secondary" style="font-size: 16px; color: white;">Cart</a>
+            <a href="@Url.Action("MyOrders", "Home")" class="btn btn-secondary" style="font-size: 16px; color: white;">Orders</a>
+            <button type="button" id="logoutButton" class="btn btn-secondary" style="font-size: 16px;">Logout</button>
+        </div>
+    </div>
+</div>
+<br />
+<div class="jumbotron">
+    <img src="~/Content/Images/CafeCartel.png" alt="CafeCartel Logo" class="logo-img">
+    <p class="lead">Your exclusive shop for premium coffee blends.</p> <br />
+    <p><a href="@Url.Action("CustomerProducts", "Home")" class="btn btn-primary btn-lg">Shop now &raquo;</a></p>
+</div>
+
+<div class="text-center">
+    <h2>Your Cart</h2>
+</div>
+
+
+<div class="cart-container">
+    <table class="cart-table">
+        <thead>
+            <tr>
+                <th>Product Name</th>
+                <th>Quantity</th>
+                <th>Price</th>
+                <th>Total</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="cartItems">
+            <!-- Cart items will be dynamically populated here -->
+        </tbody>
+    </table>
+    <div class="cart-summary">
+        <h3>Cart Summary</h3>
+        <p>Total Items: <span id="totalItems">0</span></p>
+        <p>Total Amount: ₱<span id="totalAmount">0.00</span></p>
+        <button id="ordersButton" class="orders-button">Proceed to Orders</button>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            function loadCart() {
+                $.get("../Home/GetCartItems", function (data) {
+                    var cartItems = $("#cartItems");
+                    cartItems.empty();
+                    var totalItems = 0;
+                    var totalAmount = 0;
+
+                    data.forEach(function (item) {
+                        var total = item.Quantity * item.Price;
+                        totalItems += item.Quantity;
+                        totalAmount += total;
+
+                        var row = $("<tr>");
+                        row.append($("<td>").text(item.ProductName));
+                        row.append($("<td>").html('<input type="number" class="quantity-input" data-id="' + item.ProductID + '" value="' + item.Quantity + '" min="1" />'));
+                        row.append($("<td>").text("₱" + item.Price.toFixed(2)));
+                        row.append($("<td>").text("₱" + total.toFixed(2)));
+                        row.append($("<td>").html(
+                            '<button class="remove-button btn btn-danger" data-id="' + item.ProductID + '">Remove</button>' +
+                            ' <button class="checkout-item-button btn btn-success" data-id="' + item.ProductID + '">Checkout</button>'
+                        ));
+                        cartItems.append(row);
+                    });
+
+                    $("#totalItems").text(totalItems);
+                    $("#totalAmount").text(totalAmount.toFixed(2));
+                });
+            }
+
+            // Load cart items on page load
+            loadCart();
+
+            // Update cart quantity
+            $("#cartItems").on("change", ".quantity-input", function () {
+                var productId = $(this).data("id");
+                var quantity = $(this).val();
+
+                $.post("../Home/UpdateCartItem", { productId: productId, quantity: quantity }, function (res) {
+                    if (res.success) {
+                        loadCart();
+                    } else {
+                        alert("Failed to update cart item.");
+                    }
+                });
+            });
+
+            // Remove cart item
+            $("#cartItems").on("click", ".remove-button", function () {
+                var productId = $(this).data("id");
+
+                var confirmation = confirm("Are you sure you want to remove this item from your cart?");
+                if (confirmation) {
+                    $.post("../Home/RemoveCartItem", { productId: productId }, function (res) {
+                        if (res.success) {
+                            loadCart();
+                        } else {
+                            alert("Failed to remove cart item.");
+                        }
+                    });
+                }
+            });
+
+            // Handle checkout button click
+            $("#cartItems").on("click", ".checkout-item-button", function () {
+                var row = $(this).closest("tr"); // Find the closest row containing the clicked button
+                var productId = $(this).data("id");
+                var productName = row.find("td:eq(0)").text(); // Find the first <td> in the row
+                var quantity = row.find(".quantity-input").val(); // Find the input with class "quantity-input" in the row
+                var price = parseFloat(row.find("td:eq(2)").text().replace("₱", ""));
+                var totalAmount = parseFloat(row.find("td:eq(3)").text().replace("₱", ""));
+
+                var confirmation = confirm("Are you sure you want to proceed with the checkout for " + productName + "?");
+                if (confirmation) {
+                    // Send only the details of the clicked product for checkout
+                    $.post("../Home/Checkout", {
+                        productId: productId,
+                        productName: productName,
+                        quantity: quantity,
+                        price: price,
+                        totalAmount: totalAmount
+                    }, function (res) {
+                        if (res.success) {
+                            alert(res.message);
+                            loadCart(); // Reload cart to reflect changes
+                        } else {
+                            alert(res.message);
+                        }
+                    });
+                }
+            });
+
+
+            $("#ordersButton").click(function () {
+                // Redirect the user to the MyOrders page
+                window.location.href = "@Url.Action("MyOrders", "Home")";
+            });
+
+
+            $("#logoutButton").click(function () {
+                // Prompt the user for confirmation
+                if (confirm("Are you sure you want to logout?")) {
+                    // If user confirms, make an AJAX request to the logout action
+                    $.post("../Home/Logout", function (response) {
+                        if (response.success) {
+                            alert(response.message);
+                            // Redirect to the login page or any other page
+                            window.location.href = "@Url.Action("CustomerLogin", "Home")";
+                        } else {
+                            alert("Logout failed. Please try again.");
+                        }
+                    });
+                }
+            });
+
+        });
+    </script>
+}
+
+<style>
+    h2 {
+        font-size: 34px; /* Adjust as needed */
+    }
+
+    .jumbotron {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .logo-img {
+        margin-top: -20px;
+        width: 300px; /* Adjust size as needed */
+        height: auto;
+    }
+
+    .btn {
+        font-size: 16px; /* Adjust as needed */
+        padding: 10px 20px; /* Increase padding for larger buttons */
+      
+    }
+
+    .cart-container {
+        width: 80%;
+        margin: auto;
+        padding: 20px;
+        background-color: #f9f9f9;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .cart-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+        .cart-table th, .cart-table td {
+            font-size: 18px; /* Adjust as needed */
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: center;
+        }
+
+        .cart-table th {
+            background-color: #f2f2f2;
+        }
+
+        .cart-table .btn {
+            font-size: 16px; /* Adjust as needed */
+            padding: 10px 20px; /* Increase padding for larger buttons */
+            margin-bottom: 10px;
+        }
+
+    .cart-summary {
+        margin-top: 20px;
+        text-align: right;
+    }
+
+        .cart-summary p {
+            font-size: 18px;
+        }
+
+    .orders-button {
+        margin-top: 10px;
+        background-color: #28a745;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        font-size: 18px;
+        cursor: pointer;
+        border-radius: 5px;
+        transition: background-color 0.3s;
+    }
+
+        .orders-button:hover {
+            background-color: #218838;
+        }
+</style>

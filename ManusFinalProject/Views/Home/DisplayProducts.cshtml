@@ -1,0 +1,482 @@
+﻿@using System;
+@using System.Collections.Generic;
+@using System.Linq;
+@using System.Web;
+@using System.Web.Mvc;
+@using System.Data;
+@using System.Data.SqlClient;
+@using System.IO;
+@using System.Drawing;
+@using System.Drawing.Imaging;
+@using System.Web.Services;
+
+@{
+    ViewBag.Title = "DisplayProducts";
+}
+<br />
+<div class="container" style="background-color: rgb(24, 32, 51); padding: 20px; border-radius: 15px;">
+    <div class="row">
+        <div class="col-md-6 text-left">
+            <span style="font-size: 24px; color: white;">Hi, Admin!</span>
+        </div>
+        <div class="col-md-6 text-right">
+            <a href="@Url.Action("DisplayProducts", "Home")" class="btn btn-secondary" style="font-size: 16px; color: white;">Products</a>
+            <a href="@Url.Action("CustomerList", "Home")" class="btn btn-secondary" style="font-size: 16px; color: white;">Customers</a>
+            <a href="@Url.Action("CustomerOrders", "Home")" class="btn btn-secondary" style="font-size: 16px; color: white;">Orders</a>
+            <button type="button" id="logoutButton" class="btn btn-secondary" style="font-size: 16px;">Logout</button>
+        </div>
+    </div>
+</div>
+<br />
+<div class="jumbotron">
+    <img src="~/Content/Images/CafeCartel.png" alt="CafeCartel Logo" class="logo-img">
+    <h1 style="text-align: center;">All Products at CafeCartel</h1>
+</div>
+
+<div style="float: right;">
+    <!-- Search Form -->
+    <form id="searchForm">
+        <label for="searchQuery">Search Products:</label>
+        <input type="text" id="searchQuery" name="searchQuery" />
+        <button type="button" id="searchButton">Search</button>
+    </form>
+</div>
+<br />
+
+<style>
+    .jumbotron {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .logo-img {
+        margin-top: -20px;
+        width: 300px; /* Adjust size as needed */
+        height: auto;
+    }
+
+    .search-container {
+        text-align: right;
+        margin-bottom: 20px;
+    }
+
+    #searchForm label {
+        font-size: 18px; /* Increase label font size */
+        margin-right: 10px; /* Optional: add some space between label and input */
+    }
+
+    #searchForm input[type="text"] {
+        font-size: 1.5rem; /* Increase input text size */
+        padding: 10px; /* Increase padding for larger input field */
+        margin-right: 10px; /* Optional: add some space between input and button */
+    }
+
+    #searchForm button {
+        font-size: 18px; /* Increase button text size */
+        padding: 10px 20px; /* Increase padding for larger button */
+    }
+
+    #prodtable {
+        width: 100%; /* Set table width to 100% */
+        border-collapse: collapse; /* Collapse table borders */
+    }
+
+        #prodtable th,
+        #prodtable td {
+            text-align: center; /* Center align table content */
+            padding: 8px; /* Add padding */
+            border: 1px solid #dddddd; /* Add border */
+        }
+
+    .item {
+        background-color: #f2f2f2; /* Alternate row background color */
+    }
+
+    .image img {
+        max-width: 200px; /* Set maximum image width */
+        height: auto; /* Maintain aspect ratio */
+    }
+
+    .container-fluid .actions button {
+        margin-bottom: 10px;
+        font-size: 14px; /* Adjust as needed */
+        padding: 6px 10px;
+    }
+
+    .container button {
+        font-size: 18px; /* Adjust as needed */
+        padding: 10px 20px; /* Increase padding for larger buttons */
+    }
+</style>
+<br />
+<div style="clear: both;"></div>
+<div style="float: right; font-size: 16px; margin-top: 30px;">
+    <a href="@Url.Action("ProductEntryForm", "Home")" class="btn btn-primary">Add New Product</a>
+</div>
+<div style="clear: both;"></div> <!-- Clear floats to ensure proper positioning -->
+<br> <!-- Add a line break -->
+
+@{
+    string connStr = @"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=D:\JVFILES\ASP\ManusFinalProject\ManusFinalProject\App_Data\Database1.mdf;Integrated Security=True";
+    using (var db = new SqlConnection(connStr))
+    {
+        db.Open();
+        using (var cmd = db.CreateCommand())
+        {
+            cmd.CommandType = CommandType.Text;
+            cmd.CommandText = "SELECT * FROM Product ORDER BY ProductID DESC";
+            using (var reader = cmd.ExecuteReader())
+            {
+                if (reader.HasRows)
+                {
+                    <div class="container-fluid">
+                        <!-- Use container-fluid to take full width of the screen -->
+
+                        <div class="col-md-12">
+                            <div class="table-responsive">
+                                <!-- Make table responsive -->
+
+                                <table border="1" id="prodtable">
+                                    <thead>
+                                        <tr>
+                                            <th width="15%">
+                                                <center>PRODUCT ID</center>
+                                            </th>
+                                            <th width="25%">
+                                                <center>PRODUCT NAME</center>
+                                            </th>
+                                            <th width="15%">
+                                                <center>BRAND NAME</center>
+                                            </th>
+                                            <th width="25%">
+                                                <center>SPECIFIC COFFEE BLEND OR TYPE</center>
+                                            </th>
+                                            <th width="15%">
+                                                <center>FLAVOR PROFILE</center>
+                                            </th>
+                                            <th width="15%">
+                                                <center>ROAST LEVEL</center>
+                                            </th>
+                                            <th width="15%">
+                                                <center>ORIGIN</center>
+                                            </th>
+                                            <th width="25%">
+                                                <center>RECOMMENDED BREWING METHOD</center>
+                                            </th>
+                                            <th width="15%">
+                                                <center>PACKAGING SIZE</center>
+                                            </th>
+                                            <th width="15%">
+                                                <center>EXPIRY DATE</center>
+                                            </th>
+                                            <th width="15%">
+                                                <center>PRICE</center>
+                                            </th>
+                                            <th width="15%">
+                                                <center>AVAILABILITY</center>
+                                            </th>
+                                            <th width="15%">
+                                                <center>QUANTITY</center>
+                                            </th>
+                                            <th width="50%">
+                                                <center>IMAGE</center>
+                                            </th>
+                                            <th width="20%">
+                                                <center>Actions</center>
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @while (reader.Read())
+                                        {
+                                            <tr class="item">
+                                                <td class="productID">
+                                                    <center>@reader["ProductID"]</center>
+                                                </td>
+                                                <td class="productName">
+                                                    <center>@reader["ProductName"]</center>
+                                                </td>
+                                                <td class="brandName">
+                                                    <center>@reader["BrandName"]</center>
+                                                </td>
+                                                <td class="specificCoffeeBlend">
+                                                    <center>@reader["SpecificCoffeeBlend"]</center>
+                                                </td>
+                                                <td class="flavorProfile">
+                                                    <center>@reader["FlavorProfile"]</center>
+                                                </td>
+                                                <td class="RoastLevel">
+                                                    <center>@reader["RoastLevel"]</center>
+                                                </td>
+                                                <td class="origin">
+                                                    <center>@reader["Origin"]</center>
+                                                </td>
+                                                <td class="recommendedBrewingMethod">
+                                                    <center>@reader["RecommendedBrewingMethod"]</center>
+                                                </td>
+                                                <td class="packagingSize">
+                                                    <center>@reader["PackagingSize"]</center>
+                                                </td>
+                                                <td class="expiryDate">
+                                                    <center>@reader["ExpiryDate"]</center>
+                                                </td>
+                                                <td class="price">
+                                                    <center>₱@reader["Price"]</center>
+                                                </td>
+                                                <td class="availability">
+                                                    <center>@reader["Availability"]</center>
+                                                </td>
+                                                <td class="quantity">
+                                                    <center>@reader["Quantity"]</center>
+                                                </td>
+                                                <td class="image">
+                                                    <center>
+                                                        @if (!string.IsNullOrEmpty(reader["Image"].ToString()))
+                                                        {
+                                                            <img src="~/Content/Images/@reader["Image"]" />
+                                                        }
+                                                        else
+                                                        {
+                                                            <span>No Image</span>
+                                                        }
+                                                    </center>
+                                                </td>
+                                                <td class="actions">
+                                                    <button type="button" class="btn btn-primary editButton">Edit</button>
+                                                    <button type="button" class="btn btn-danger deleteButton">Delete</button>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+
+                        </div>
+                    </div>
+                }
+            }
+        }
+    }
+}
+
+<!-- Edit Product Modal -->
+<div class="modal fade" id="editProductModal" tabindex="-1" role="dialog" aria-labelledby="editProductModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="editProductModalLabel">Edit Product</h2>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="editProductForm">
+                    <input type="hidden" id="editProductID" name="productID" />
+                    <div class="form-group">
+                        <label for="editProductName">Product Name:</label>
+                        <input type="text" class="form-control" id="editProductName" name="productName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editBrandName">Brand Name:</label>
+                        <input type="text" class="form-control" id="editBrandName" name="brandName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editBlendType">Specific Blend or Type:</label>
+                        <input type="text" class="form-control" id="editBlendType" name="blendType" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editFlavorProfile">Flavor Profile:</label>
+                        <input type="text" class="form-control" id="editFlavorProfile" name="flavorProfile" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editRoastLevel">Roast Level:</label>
+                        <input type="text" class="form-control" id="editRoastLevel" name="roastLevel" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editOrigin">Origin:</label>
+                        <input type="text" class="form-control" id="editOrigin" name="origin" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editPackagingSize">Packaging Size:</label>
+                        <input type="text" class="form-control" id="editPackagingSize" name="packagingSize" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editBrewingMethod">Recommended Brewing Method:</label>
+                        <input type="text" class="form-control" id="editBrewingMethod" name="brewingMethod" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editExpiryDate">Expiry Date:</label>
+                        <input type="date" class="form-control" id="editExpiryDate" name="expiryDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editPrice">Price:</label>
+                        <input type="text" class="form-control" id="editPrice" name="price" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editAvailability">Availability:</label>
+                        <select class="form-control" id="editAvailability" name="availability" required>
+                            <option value="In Stock">In Stock</option>
+                            <option value="Out of Stock">Out of Stock</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="editQuantity">Quantity:</label>
+                        <input type="number" class="form-control" id="editQuantity" name="quantity" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editImage">Product Image:</label>
+                        <input type="file" class="form-control-file" id="editImage" name="image" accept="image/*">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+
+    <script>
+        $(document).ready(function () {
+            // Function to filter table rows based on search query
+            function filterTable(searchQuery) {
+                var filter = searchQuery.toUpperCase();
+                $("#prodtable tbody tr").each(function () {
+                    var text = $(this).text().toUpperCase();
+                    $(this).toggle(text.indexOf(filter) > -1);
+                });
+            }
+
+            // Event listener for search button click
+            $("#searchButton").click(function () {
+                var searchQuery = $("#searchQuery").val();
+                filterTable(searchQuery);
+            });
+
+            // Edit button click handler
+            $("#prodtable").on("click", ".editButton", function () {
+                var $row = $(this).closest("tr");
+
+                // Get current product details
+                var productId = $row.find(".productID").text().trim();
+                var productName = $row.find(".productName").text().trim();
+                var brandName = $row.find(".brandName").text().trim();
+                var blendType = $row.find(".specificCoffeeBlend").text().trim();
+                var flavorProfile = $row.find(".flavorProfile").text().trim();
+                var roastLevel = $row.find(".RoastLevel").text().trim();
+                var origin = $row.find(".origin").text().trim();
+                var packagingSize = $row.find(".packagingSize").text().trim();
+                var brewingMethod = $row.find(".recommendedBrewingMethod").text().trim();
+                var expiryDate = $row.find(".expiryDate").text().trim();
+                var price = $row.find(".price").text().trim().replace('₱', '');
+                var availability = $row.find(".availability").text().trim();
+                var quantity = $row.find(".quantity").text().trim();
+
+                // Populate the modal fields
+                $("#editProductID").val(productId);
+                $("#editProductName").val(productName);
+                $("#editBrandName").val(brandName);
+                $("#editBlendType").val(blendType);
+                $("#editFlavorProfile").val(flavorProfile);
+                $("#editRoastLevel").val(roastLevel);
+                $("#editOrigin").val(origin);
+                $("#editPackagingSize").val(packagingSize);
+                $("#editBrewingMethod").val(brewingMethod);
+                $("#editExpiryDate").val(expiryDate);
+                $("#editPrice").val(price);
+                $("#editAvailability").val(availability);
+                $("#editQuantity").val(quantity);
+
+                // Show the modal
+                $("#editProductModal").modal("show");
+            });
+
+            // Handle form submission
+            $("#editProductForm").submit(function (event) {
+                event.preventDefault();
+
+                // Clear previous validation feedback
+                $("#editProductForm input, #editProductForm select").removeClass("is-invalid");
+
+                // Validate fields (example)
+                var isValid = true;
+                $("#editProductForm input[required], #editProductForm select[required]").each(function () {
+                    if (!$(this).val()) {
+                        isValid = false;
+                        $(this).addClass("is-invalid");
+                    }
+                });
+
+                if (!isValid) {
+                    alert("Please fill in all required fields.");
+                    return;
+                }
+
+                // Create a FormData object to handle file upload
+                var formData = new FormData($(this)[0]); // Serialize the form data
+
+                $.post({
+                    url: "../Home/EditProduct", // Your server-side script to handle edit
+                    type: "POST",
+                    data: formData,
+                    contentType: false,
+                    processData: false,
+                    success: function (response) {
+                        if (response.length > 0 && response[0].mess === 1) {
+                            alert("Product updated successfully.");
+                            location.reload(); // Reload the page to see the changes
+                        } else {
+                            alert("Failed to update product.");
+                        }
+                    },
+                    error: function () {
+                        alert("Error communicating with the server.");
+                    }
+                });
+            });
+
+            // Delete button click handler
+            $("#prodtable").on("click", ".deleteButton", function () {
+                var $row = $(this).closest("tr");
+                var productId = $row.find(".productID").text().trim();
+                // Confirm deletion
+                var confirmed = confirm("Are you sure you want to delete Product " + productId + "?");
+                if (confirmed) {
+                    $.post("../Home/DeleteProduct", {
+                        id: productId
+                    }, function (res) {
+                        // Handle the response
+                        if (res.length > 0 && res[0].mess === 1) {
+                            // Remove the row from the table
+                            $row.remove();
+                            alert("Product deleted successfully.");
+                        } else {
+                            alert("Failed to delete product.");
+                        }
+                    }).fail(function () {
+                        alert("Error communicating with the server.");
+                    });
+                }
+            });
+
+            $("#logoutButton").click(function () {
+                // Prompt the user for confirmation
+                if (confirm("Are you sure you want to logout?")) {
+                    // If user confirms, make an AJAX request to the logout action
+                    $.post("../Home/Logout", function (response) {
+                        if (response.success) {
+                            alert(response.message);
+                            // Redirect to the login page or any other page
+                            window.location.href = "@Url.Action("AdminLogin", "Home")";
+                        } else {
+                            alert("Logout failed. Please try again.");
+                        }
+                    });
+                }
+            });
+        });
+    </script>
+}

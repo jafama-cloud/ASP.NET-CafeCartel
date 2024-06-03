@@ -1,0 +1,226 @@
+﻿@{
+    ViewBag.Title = "ProductEntryForm";
+}
+<style>
+    .jumbotron {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        text-align: center;
+    }
+
+        .jumbotron a {
+            font-size: 18px; /* Adjust as needed */
+        }
+
+    .logo-img {
+        margin-top: -20px;
+        width: 300px; /* Adjust size as needed */
+        height: auto;
+    }
+
+    #productForm .form-group label {
+        font-size: 18px; /* Adjust as needed */
+    }
+
+    #productForm .form-control {
+        font-size: 18px; /* Adjust as needed */
+        padding: 20px; /* Increase padding for larger input fields */
+    }
+
+    #productForm .btn {
+        font-size: 18px; /* Adjust as needed */
+        padding: 10px 20px; /* Increase padding for larger buttons */
+    }
+
+    p {
+        font-size: 16px; /* Adjust as needed */
+    }
+
+    .container button {
+        font-size: 18px; /* Adjust as needed */
+        padding: 10px 20px; /* Increase padding for larger buttons */
+    }
+</style>
+
+<br />
+<div class="container" style="background-color: rgb(24, 32, 51); padding: 20px; border-radius: 15px;">
+    <div class="row">
+        <div class="col-md-6 text-left">
+            <span style="font-size: 24px; color: white;">Hi, Admin!</span>
+        </div>
+        <div class="col-md-6 text-right">
+            <a href="@Url.Action("DisplayProducts", "Home")" class="btn btn-secondary" style="font-size: 16px; color: white;">Products</a>
+            <a href="@Url.Action("CustomerList", "Home")" class="btn btn-secondary" style="font-size: 16px; color: white;">Customers</a>
+            <a href="@Url.Action("CustomerOrders", "Home")" class="btn btn-secondary" style="font-size: 16px; color: white;">Orders</a>
+            <button type="button" id="logoutButton" class="btn btn-secondary" style="font-size: 16px;">Logout</button>
+        </div>
+    </div>
+</div>
+<br />
+<div class="jumbotron">
+    <img src="~/Content/Images/CafeCartel.png" alt="CafeCartel Logo" class="logo-img">
+    <h1 style="text-align: center;">Product Entry Form</h1>
+    <div style="text-align: center; margin-top: 15px;">
+        <a href="@Url.Action("DisplayProducts", "Home")" class="btn btn-secondary">View All Products</a>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-6">
+            <form id="productForm" method="post" actions="../Home/ProductEntryForm" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="productName">Product Name:</label>
+                    <input type="text" class="form-control" id="productName" name="productName">
+                </div>
+                <div class="form-group">
+                    <label for="brandName">Brand Name:</label>
+                    <input type="text" class="form-control" id="brandName" name="brandName">
+                </div>
+                <div class="form-group">
+                    <label for="blendType">Specific Blend or Type:</label>
+                    <select class="form-control" id="blendType" name="blendType">
+                        <option value="Decaffeinated Coffee">Decaffeinated Coffee</option>
+                        <option value="Espresso Style Coffee">Espresso Style Coffee</option>
+                        <option value="Instant Coffee">Instant Coffee</option>
+                        <option value="Single-Origin Coffee">Single-Origin Coffee</option>
+                        <option value="Specialty Blends">Specialty Blends</option>
+                        <option value="Health and Wellness Coffee">Health and Wellness Coffee</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="flavorProfile">Flavor Profile:</label>
+                    <input type="text" class="form-control" id="flavorProfile" name="flavorProfile">
+                </div>
+                <div class="form-group">
+                    <label for="roastLevel">Roast Level:</label>
+                    <select class="form-control" id="roastLevel" name="roastLevel">
+                        <option value="Light">Light</option>
+                        <option value="Medium">Medium</option>
+                        <option value="Medium-Dark">Medium-Dark</option>
+                        <option value="Dark">Dark</option>
+                        <option value="Not Specified">Not Specified</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="origin">Origin:</label>
+                    <input type="text" class="form-control" id="origin" name="origin">
+                </div>
+                <div class="form-group">
+                    <label for="packagingSize">Packaging Size:</label>
+                    <input type="text" class="form-control" id="packagingSize" name="packagingSize">
+                </div>
+                <div class="form-group">
+                    <label for="brewingMethod">Recommended Brewing Method:</label>
+                    <select class="form-control" id="brewingMethod" name="brewingMethod">
+                        <option value="Drip">Drip</option>
+                        <option value="French Press">French Press</option>
+                        <option value="Espresso">Espresso</option>
+                        <option value="Pour Over">Pour Over</option>
+                        <option value="Instant">Instant</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="expiryDate">Expiry Date:</label>
+                    <input type="date" class="form-control" id="expiryDate" name="expiryDate">
+                </div>
+                <div class="form-group">
+                    <label for="price">Price:</label>
+                    <input type="text" class="form-control" id="price" name="price">
+                </div>
+                <div class="form-group">
+                    <label for="availability">Availability:</label>
+                    <select class="form-control" id="availability" name="availability">
+                        <option value="In Stock">In Stock</option>
+                        <option value="Out of Stock">Out of Stock</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="quantity">Quantity:</label>
+                    <input type="number" class="form-control" id="quantity" name="quantity">
+                </div>
+                <div class="form-group">
+                    <label for="image">Product Image:</label>
+                    <input type="file" class="form-control-file" id="image" name="image" accept="image/png,image/jpeg,image/jpg,image/gif,image/bmp">
+                </div> <br />
+                <button type="submit" class="btn btn-primary">Submit</button>
+            </form>
+        </div>
+    </div>
+</div>
+<script src="~/Scripts/jqueryLatest/jquery-3.7.1.min.js"></script>
+<script>
+    $(document).ready(function () {
+    $("#productForm").submit(function (event) {
+        // Prevent the default form submission
+        event.preventDefault();
+
+        // Get the values of all input fields
+        var productName = $("#productName").val();
+        var brandName = $("#brandName").val();
+        var flavorProfile = $("#flavorProfile").val();
+        var origin = $("#origin").val();
+        var packagingSize = $("#packagingSize").val();
+        var priceValue = parseFloat($("#price").val());
+        var expiryDateValue = new Date($("#expiryDate").val());
+        var currentDate = new Date();
+        var quantityValue = parseInt($("#quantity").val());
+
+        // Flag to track if any validation fails
+        var isValid = true;
+
+        // Check if any input field is empty (null)
+        if (!productName || !brandName || !flavorProfile || !origin || !packagingSize || !priceValue || !expiryDateValue || !quantityValue) {
+            // Alert the user
+            alert("Please fill in all fields.");
+            isValid = false;
+        }
+
+        // Check if the price is negative
+        if (priceValue < 0) {
+            // Alert the user
+            alert("Price cannot be negative.");
+            isValid = false;
+        }
+
+        // Check if the expiry date is in the past
+        if (expiryDateValue < currentDate) {
+            // Alert the user
+            alert("Expiry date cannot be in the past.");
+            isValid = false;
+        }
+
+        // Check if the quantity is negative
+        if (quantityValue < 0) {
+            // Alert the user
+            alert("Quantity cannot be negative.");
+            isValid = false;
+        }
+
+        // If all validations pass, submit the form
+        if (isValid) {
+            this.submit();
+        }
+    });
+
+    $("#logoutButton").click(function () {
+        // Prompt the user for confirmation
+        if (confirm("Are you sure you want to logout?")) {
+            // If user confirms, make an AJAX request to the logout action
+            $.post("../Home/Logout", function (response) {
+                if (response.success) {
+                    alert(response.message);
+                    // Redirect to the login page or any other page
+                    window.location.href = "@Url.Action("AdminLogin", "Home")";
+                } else {
+                    alert("Logout failed. Please try again.");
+                }
+            });
+        }
+    });
+});
+
+
+</script>

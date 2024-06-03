@@ -1,0 +1,279 @@
+﻿@using System;
+@using System.Collections.Generic;
+@using System.Linq;
+@using System.Web;
+@using System.Web.Mvc;
+@using System.Data;
+@using System.Data.SqlClient;
+@using System.IO;
+@using System.Drawing;
+@using System.Drawing.Imaging;
+@using System.Web.Services;
+
+@{
+    ViewBag.Title = "CustomerList";
+}
+<br />
+<div class="container" style="background-color: rgb(24, 32, 51); padding: 20px; border-radius: 15px;">
+    <div class="row">
+        <div class="col-md-6 text-left">
+            <span style="font-size: 24px; color: white;">Hi, Admin!</span>
+        </div>
+        <div class="col-md-6 text-right">
+            <a href="@Url.Action("DisplayProducts", "Home")" class="btn btn-secondary" style="font-size: 16px; color: white;">Products</a>
+            <a href="@Url.Action("CustomerList", "Home")" class="btn btn-secondary" style="font-size: 16px; color: white;">Customers</a>
+            <a href="@Url.Action("CustomerOrders", "Home")" class="btn btn-secondary" style="font-size: 16px; color: white;">Orders</a>
+            <button type="button" id="logoutButton" class="btn btn-secondary" style="font-size: 16px;">Logout</button>
+        </div>
+    </div>
+</div>
+<br />
+<div class="jumbotron">
+    <img src="~/Content/Images/CafeCartel.png" alt="CafeCartel Logo" class="logo-img">
+    <h1 style="text-align: center;">All Customers at CafeCartel</h1>
+</div>
+
+<div style="float: right;">
+    <!-- Search Form -->
+    <form id="searchForm">
+        <label for="searchQuery">Search Customers:</label>
+        <input type="text" id="searchQuery" name="searchQuery" />
+        <button type="button" id="searchButton">Search</button>
+    </form>
+</div>
+<br /> <br /> <br />
+
+<style>
+    .jumbotron {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .logo-img {
+        margin-top: -20px;
+        width: 300px; /* Adjust size as needed */
+        height: auto;
+    }
+
+    .search-container {
+        text-align: right;
+        margin-bottom: 20px;
+    }
+
+    #searchForm label {
+        font-size: 18px; /* Increase label font size */
+        margin-right: 10px; /* Optional: add some space between label and input */
+    }
+
+    #searchForm input[type="text"] {
+        font-size: 1.5rem; /* Increase input text size */
+        padding: 10px; /* Increase padding for larger input field */
+        margin-right: 10px; /* Optional: add some space between input and button */
+    }
+
+    #searchForm button {
+        font-size: 18px; /* Increase button text size */
+        padding: 10px 20px; /* Increase padding for larger button */
+    }
+
+    #prodtable {
+        width: 100%; /* Set table width to 100% */
+        border-collapse: collapse; /* Collapse table borders */
+    }
+
+        #prodtable th,
+        #prodtable td {
+            text-align: center; /* Center align table content */
+            padding: 8px; /* Add padding */
+            border: 1px solid #dddddd; /* Add border */
+        }
+
+    .item {
+        background-color: #f2f2f2; /* Alternate row background color */
+    }
+
+    .image img {
+        max-width: 200px; /* Set maximum image width */
+        height: auto; /* Maintain aspect ratio */
+    }
+
+    .container button {
+        font-size: 18px; /* Adjust as needed */
+        padding: 10px 20px; /* Increase padding for larger buttons */
+    }
+</style>
+<br />
+
+@{
+    string connStr = @"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=D:\JVFILES\ASP\ManusFinalProject\ManusFinalProject\App_Data\Database1.mdf;Integrated Security=True";
+    using (var db = new SqlConnection(connStr))
+    {
+        db.Open();
+        using (var cmd = db.CreateCommand())
+        {
+            cmd.CommandType = CommandType.Text;
+            cmd.CommandText = "SELECT * FROM PROFILE ORDER BY Account_Id DESC";
+            using (var reader = cmd.ExecuteReader())
+            {
+                if (reader.HasRows)
+                {
+                    <div class="container-fluid">
+                        <!-- Use container-fluid to take full width of the screen -->
+
+                        <div class="col-md-12">
+                            <div class="table-responsive">
+                                <!-- Make table responsive -->
+
+                                <table border="1" id="prodtable">
+                                    <thead>
+                                        <tr>
+                                            <th width="15%">
+                                                <center>ACCOUNT ID</center>
+                                            </th>
+                                            <th width="25%">
+                                                <center>FIRST NAME</center>
+                                            </th>
+                                            <th width="15%">
+                                                <center>LAST NAME</center>
+                                            </th>
+                                            <th width="25%">
+                                                <center>DATE OF BIRTH</center>
+                                            </th>
+                                            <th width="15%">
+                                                <center>GENDER</center>
+                                            </th>
+                                            <th width="15%">
+                                                <center>CONTACT NUMBER</center>
+                                            </th>
+                                            <th width="15%">
+                                                <center>EMAIL</center>
+                                            </th>
+                                            <th width="25%">
+                                                <center>STREET ADDRESS</center>
+                                            </th>
+                                            <th width="15%">
+                                                <center>CITY</center>
+                                            </th>
+                                            <th width="15%">
+                                                <center>BARANGAY</center>
+                                            </th>
+                                            <th width="15%">
+                                                <center>POSTAL CODE</center>
+                                            </th>
+                                            <th width="15%">
+                                                <center>COUNTRY</center>
+                                            </th>
+                                            <th width="15%">
+                                                <center>OCCUPATION</center>
+                                            </th>
+                                            <th width="50%">
+                                                <center>EDUCATION LEVEL</center>
+                                            </th>
+                                            <th width="20%">
+                                                <center>SHIPPING ADDRESS</center>
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @while (reader.Read())
+                                        {
+                                            <tr class="item">
+                                                <td class="account_id">
+                                                    <center>@reader["Account_Id"]</center>
+                                                </td>
+                                                <td class="firstName">
+                                                    <center>@reader["FirstName"]</center>
+                                                </td>
+                                                <td class="lastName">
+                                                    <center>@reader["LastName"]</center>
+                                                </td>
+                                                <td class="dateOfBirth">
+                                                    <center>@reader["DateOfBirth"]</center>
+                                                </td>
+                                                <td class="gender">
+                                                    <center>@reader["Gender"]</center>
+                                                </td>
+                                                <td class="contactNumber">
+                                                    <center>@reader["ContactNumber"]</center>
+                                                </td>
+                                                <td class="email">
+                                                    <center>@reader["Email"]</center>
+                                                </td>
+                                                <td class="streetAddress">
+                                                    <center>@reader["StreetAddress"]</center>
+                                                </td>
+                                                <td class="city">
+                                                    <center>@reader["City"]</center>
+                                                </td>
+                                                <td class="barangay">
+                                                    <center>@reader["Barangay"]</center>
+                                                </td>
+                                                <td class="postalCode">
+                                                    <center>@reader["PostalCode"]</center>
+                                                </td>
+                                                <td class="country">
+                                                    <center>@reader["Country"]</center>
+                                                </td>
+                                                <td class="occupation">
+                                                    <center>@reader["Occupation"]</center>
+                                                </td>
+                                                <td class="educationLevel">
+                                                    <center>@reader["educationLevel"]</center>
+                                                </td>
+                                                <td class="shippingAddress">
+                                                    <center>@reader["ShippingAddress"]</center>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+
+                        </div>
+                    </div>
+                }
+            }
+        }
+    }
+}
+
+@section Scripts {
+
+    <script>
+        $(document).ready(function () {
+            // Function to filter table rows based on search query
+            function filterTable(searchQuery) {
+                var filter = searchQuery.toUpperCase();
+                $("#prodtable tbody tr").each(function () {
+                    var text = $(this).text().toUpperCase();
+                    $(this).toggle(text.indexOf(filter) > -1);
+                });
+            }
+
+            // Event listener for search button click
+            $("#searchButton").click(function () {
+                var searchQuery = $("#searchQuery").val();
+                filterTable(searchQuery);
+            });
+
+            $("#logoutButton").click(function () {
+                // Prompt the user for confirmation
+                if (confirm("Are you sure you want to logout?")) {
+                    // If user confirms, make an AJAX request to the logout action
+                    $.post("../Home/Logout", function (response) {
+                        if (response.success) {
+                            alert(response.message);
+                            // Redirect to the login page or any other page
+                            window.location.href = "@Url.Action("AdminLogin", "Home")";
+                        } else {
+                            alert("Logout failed. Please try again.");
+                        }
+                    });
+                }
+            });
+        });
+    </script>
+}

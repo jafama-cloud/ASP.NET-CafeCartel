@@ -1,0 +1,186 @@
+﻿@{
+    ViewBag.Title = "CustomerEntryForm";
+}
+<style>
+    .jumbotron {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .logo-img {
+        margin-top: -20px;
+        width: 300px; /* Adjust size as needed */
+        height: auto;
+    }
+
+    #productForm legend {
+        font-size: 22px; /* Adjust as needed */
+    }
+
+    #productForm .form-group label {
+        font-size: 18px; /* Adjust as needed */
+    }
+
+    #productForm .form-control {
+        font-size: 18px; /* Adjust as needed */
+        padding: 20px; /* Increase padding for larger input fields */
+    }
+
+    #productForm .btn {
+        font-size: 18px; /* Adjust as needed */
+        padding: 10px 20px; /* Increase padding for larger buttons */
+    }
+
+    p {
+        font-size: 16px; /* Adjust as needed */
+    }
+
+    .jumbotron a {
+        font-size: 18px; /* Adjust as needed */
+    }
+
+    .btn {
+        font-size: 18px; /* Adjust as needed */
+        padding: 10px 20px; /* Increase padding for larger buttons */
+    }
+</style>
+<br />
+<div class="container" style="background-color: rgb(24, 32, 51); padding: 20px; border-radius: 15px;">
+    <div class="row">
+        <div class="col-md-6 text-left">
+            <span style="font-size: 24px; color: white;">Hi, @ViewBag.FirstName!</span>
+        </div>
+        <div class="col-md-6 text-right">
+            <a href="@Url.Action("CustomerProfile", "Home")" class="btn btn-secondary" style="font-size: 16px; color: white;">Profile</a>
+            <a href="@Url.Action("CustomerProducts", "Home")" class="btn btn-secondary" style="font-size: 16px; color: white;">Products</a>
+            <a href="@Url.Action("ViewCart", "Home")" class="btn btn-secondary" style="font-size: 16px; color: white;">Cart</a>
+            <a href="@Url.Action("MyOrders", "Home")" class="btn btn-secondary" style="font-size: 16px; color: white;">Orders</a>
+            <button type="button" id="logoutButton" class="btn btn-secondary" style="font-size: 16px;">Logout</button>
+        </div>
+    </div>
+</div>
+
+<br />
+<div class="jumbotron">
+    <img src="~/Content/Images/CafeCartel.png" alt="CafeCartel Logo" class="logo-img">
+    <h1 style="text-align: center;">Customer Entry Form</h1>
+    <div style="text-align: center; margin-top: 15px;">
+        <a href="@Url.Action("CustomerProfile", "Home")" class="btn btn-secondary">View My Profile</a>
+    </div>
+</div>
+
+<div class="container" style="margin-top: 30px;">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <form id="productForm" method="post" actions="../Home/CustomerEntryForm" enctype="multipart/form-data">
+                <!-- Personal Information -->
+                <fieldset>
+                    <legend>Personal Information</legend>
+                    <div class="form-group">
+                        <label for="firstName">First Name:</label>
+                        <input type="text" class="form-control" id="firstName" name="firstName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="lastName">Last Name:</label>
+                        <input type="text" class="form-control" id="lastName" name="lastName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="dateOfBirth">Date of Birth:</label>
+                        <input type="date" class="form-control" id="dateOfBirth" name="dateOfBirth" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="gender">Gender:</label>
+                        <select id="gender" name="gender" class="form-control" required>
+                            <option value="">Select Gender</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                </fieldset> <br />
+
+                <!-- Contact Information -->
+                <fieldset>
+                    <legend>Contact Information</legend>
+                    <div class="form-group">
+                        <label for="contactNumber">Contact Number:</label>
+                        <input type="text" class="form-control" id="contactNumber" name="contactNumber">
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email:</label>
+                        <input type="email" class="form-control" id="email" name="email">
+                    </div>
+                </fieldset>  <br />
+
+                <!-- Address Information -->
+                <fieldset>
+                    <legend>Address Information</legend>
+                    <div class="form-group">
+                        <label for="streetAddress">Street Address:</label>
+                        <input type="text" class="form-control" id="streetAddress" name="streetAddress">
+                    </div>
+                    <div class="form-group">
+                        <label for="city">City:</label>
+                        <input type="text" class="form-control" id="city" name="city">
+                    </div>
+                    <div class="form-group">
+                        <label for="barangay">Barangay:</label>
+                        <input type="text" class="form-control" id="barangay" name="barangay">
+                    </div>
+                    <div class="form-group">
+                        <label for="postalCode">Postal Code:</label>
+                        <input type="text" class="form-control" id="postalCode" name="postalCode">
+                    </div>
+                    <div class="form-group">
+                        <label for="country">Country:</label>
+                        <input type="text" class="form-control" id="country" name="country">
+                    </div>
+                </fieldset>  <br />
+
+                <!-- Additional Information -->
+                <fieldset>
+                    <legend>Additional Information</legend>
+                    <div class="form-group">
+                        <label for="occupation">Occupation:</label>
+                        <input type="text" class="form-control" id="occupation" name="occupation">
+                    </div>
+                    <div class="form-group">
+                        <label for="educationLevel">Education Level:</label>
+                        <input type="text" class="form-control" id="educationLevel" name="educationLevel">
+                    </div>
+                    <div class="form-group">
+                        <label for="shippingAddress">Shipping Address:</label>
+                        <input type="text" class="form-control" id="shippingAddress" name="shippingAddress">
+                    </div>
+                </fieldset>  <br />
+
+                <div>
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<script src="~/Scripts/jqueryLatest/jquery-3.7.1.min.js"></script>
+<script>
+
+    $("#logoutButton").click(function () {
+        // Prompt the user for confirmation
+        if (confirm("Are you sure you want to logout?")) {
+            // If user confirms, make an AJAX request to the logout action
+            $.post("../Home/Logout", function (response) {
+                if (response.success) {
+                    alert(response.message);
+                    // Redirect to the login page or any other page
+                    window.location.href = "@Url.Action("CustomerLogin", "Home")";
+                } else {
+                    alert("Logout failed. Please try again.");
+                }
+            });
+        }
+    });
+
+</script>
